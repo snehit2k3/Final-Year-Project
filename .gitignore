@@ -1,0 +1,19 @@
+# Ignore dataset
+RNN/PrimeSmartVuln.csv
+
+# Ignore Python cache & compiled files
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Ignore Jupyter notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore virtual environments
+venv/
+.env/
+
+# Ignore OS / IDE files
+.DS_Store
+Thumbs.db
+*.swp
