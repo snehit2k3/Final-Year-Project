@@ -10,7 +10,7 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Embedding, LSTM, Dense, Dropout
 from sklearn.metrics import classification_report
 from reentrancy_rule_checker import check_external_before_state_update
-
+example_contract
 ### Step 1: Load & Filter Data
 df = pd.read_csv("PrimeSmartVuln.csv")
 

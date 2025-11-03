@@ -1,0 +1,11 @@
+pandas
+scikit-learn
+joblib
+Flask
+Flask-Cors
+torch
+geometric.data
+slither-analyzer
+pygame
+tqdm
+solc-select

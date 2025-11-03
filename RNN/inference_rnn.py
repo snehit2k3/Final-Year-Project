@@ -4,7 +4,7 @@ import re
 import pickle
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.models import load_model
-from reentrancy_rule_checker import check_external_before_state_update
+from reentrancy_rule_checker import detect_external_before_state_update  # fixed import
 
 # Load model and tokenizer
 model = load_model("reentrancy_lstm_model.h5")
@@ -33,11 +33,11 @@ def predict_reentrancy(code):
 # Combine rule-based + model decision
 def final_classification(code):
     rnn_prob = predict_reentrancy(code)
-    rule_flag = check_external_before_state_update(code)
+    rule_flag = detect_external_before_state_update(code)  # fixed function name
 
     # Final decision
     if rnn_prob > 0.5 or rule_flag:
-        label = "⚠️ Likely Vulnerable"
+        label = "⚠️  Likely Vulnerable"
     else:
         label = "✅ Likely Safe"
 
@@ -45,13 +45,13 @@ def final_classification(code):
 
 # Run inference on an example Solidity contract
 if __name__ == "__main__":
-    with open("example_contract.sol", "r") as f:
+    with open("example_contract2.sol", "r") as f:
         solidity_code = f.read()
 
     verdict, confidence, rule_detected = final_classification(solidity_code)
 
     print("\n================ Reentrancy Detection Report ================")
-    print("🔍 Final Verdict               :", verdict)
-    print("🧠 RNN Vulnerability Probability:", f"{confidence:.4f}")
-    print("🧾 Rule-based Red Flag Detected:", rule_detected)
+    print("🔍 Final Verdict               : ", verdict)
+    print("🧠 RNN Vulnerability Probability: ", f"{confidence:.4f}")
+    print("🧾 Rule-based Red Flag Detected: ", rule_detected)
     print("============================================================\n")
