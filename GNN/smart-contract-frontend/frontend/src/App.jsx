@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { FileText, Zap, Aperture, CheckCircle, Upload, XCircle, Code, Loader2, Database } from 'lucide-react';
-import.meta.env.VITE_RNN_API;
+
 // Utility component for consistent Card styling
 const Card = ({ title, content, color, icon: Icon, defaultText }) => (
   <div className={`p-4 ${color} border rounded-xl shadow-sm space-y-2`}>
@@ -86,17 +86,31 @@ export default function App() {
     setIsAnalyzing(true);
     setResults(prev => ({ ...prev, error: null }));
     
-    // --- UPDATED API LOGIC ---
+    // --- UPDATED API LOGIC FOR VITE ---
     let apiUrl;
+    
+    // 1. Get URLs from Vercel Environment Variables (Must use import.meta.env for Vite)
+    const rnnEnvUrl = import.meta.env.VITE_RNN_API;
+    const gnnEnvUrl = import.meta.env.VITE_GNN_API;
+
+    // 2. Fallbacks for local testing (localhost)
+    // IMPORTANT: On Vercel, these must be defined in Settings > Environment Variables
+    const rnnFallback = 'http://127.0.0.1:5001'; 
+    const gnnFallback = 'http://127.0.0.1:5002';
+
     if (selectedModel === 'rnn') {
-      // Uses the Vercel Env Variable if available, otherwise defaults to localhost for testing
-      const baseUrl = process.env.REACT_APP_RNN_API || 'https://rnn-backend-0vd1.onrender.com';
-      apiUrl = `${baseUrl}/analyze`; 
+      const baseUrl = rnnEnvUrl || rnnFallback;
+      // Ensure we don't have double slashes if the env var ends in /
+      const cleanBase = baseUrl.replace(/\/$/, '');
+      apiUrl = `${cleanBase}/predict`; 
     } else { // 'gnn'
-      const baseUrl = process.env.REACT_APP_GNN_API || 'https://gnn-backend-q9a6.onrender.com';
-      apiUrl = `${baseUrl}/analyze`;
+      const baseUrl = gnnEnvUrl || gnnFallback;
+      const cleanBase = baseUrl.replace(/\/$/, '');
+      apiUrl = `${cleanBase}/predict`;
     }
-    // -------------------------
+    
+    console.log("Attempting to connect to:", apiUrl); 
+    // ----------------------------------
 
     try {
       const response = await fetch(apiUrl, {
