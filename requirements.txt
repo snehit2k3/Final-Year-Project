@@ -1,12 +1,19 @@
-pandas
-scikit-learn
-joblib
+# Web Framework & Server
 Flask
 Flask-Cors
-torch
-geometric.data
-slither-analyzer
-pygame
-tqdm
-solc-select
 gunicorn
+werkzeug
+
+# Machine Learning & AI
+torch
+torch_geometric
+tensorflow
+scikit-learn
+numpy
+pandas
+joblib
+tqdm
+
+# Smart Contract Analysis
+slither-analyzer
+solc-select
