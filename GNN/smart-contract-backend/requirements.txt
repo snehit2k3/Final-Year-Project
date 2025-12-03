@@ -5,3 +5,4 @@ numpy
 slither-analyzer
 solc-select
 joblib
+scikit-learn
