@@ -1,7 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { FileText, Zap, Aperture, CheckCircle, Upload, XCircle, Code, Loader2, Database } from 'lucide-react';
 
-
 // Utility component for consistent Card styling
 const Card = ({ title, content, color, icon: Icon, defaultText }) => (
   <div className={`p-4 ${color} border rounded-xl shadow-sm space-y-2`}>
@@ -21,7 +20,7 @@ const Card = ({ title, content, color, icon: Icon, defaultText }) => (
 export default function App() {
   const [contractCode, setContractCode] = useState('');
   const [fileName, setFileName] = useState('No contract selected');
-  const [selectedModel, setSelectedModel] = useState('rnn'); // <-- ADDED
+  const [selectedModel, setSelectedModel] = useState('rnn');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [results, setResults] = useState({
     vulnerabilities: 'N/A',
@@ -87,13 +86,17 @@ export default function App() {
     setIsAnalyzing(true);
     setResults(prev => ({ ...prev, error: null }));
     
-    // Point to the correct server based on the selected model
+    // --- UPDATED API LOGIC ---
     let apiUrl;
     if (selectedModel === 'rnn') {
-      apiUrl = 'http://127.0.0.1:5001/analyze';
+      // Uses the Vercel Env Variable if available, otherwise defaults to localhost for testing
+      const baseUrl = process.env.REACT_APP_RNN_API || 'http://127.0.0.1:5001';
+      apiUrl = `${baseUrl}/analyze`; 
     } else { // 'gnn'
-      apiUrl = 'http://127.0.0.1:5002/analyze';
+      const baseUrl = process.env.REACT_APP_GNN_API || 'http://127.0.0.1:5002';
+      apiUrl = `${baseUrl}/analyze`;
     }
+    // -------------------------
 
     try {
       const response = await fetch(apiUrl, {
@@ -278,7 +281,7 @@ export default function App() {
             content={results.optimization}
             color="bg-yellow-50 border-yellow-300"
             icon={Aperture}
-            defaultText="Select a contract and analyze toV= view suggestions."
+            defaultText="Select a contract and analyze to view suggestions."
           />
           <Card
             title="Compliance Status"
@@ -292,4 +295,3 @@ export default function App() {
     </div>
   );
 }
-
