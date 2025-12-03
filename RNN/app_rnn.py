@@ -13,9 +13,13 @@ except ImportError:
     def detect_external_before_state_update(code):
         return False
 
-# Initialize the Flask app and configure CORS
+# Initialize the Flask app
 app = Flask(__name__)
-CORS(app)
+
+# --- CORS FIX ---
+# Allow all origins ("*") to fix the immediate access issue.
+# We also explicitly allow the OPTIONS method which browsers use for preflight checks.
+CORS(app, resources={r"/*": {"origins": "*"}}, methods=["GET", "POST", "OPTIONS"])
 
 # --- GLOBAL VARIABLES (LAZY LOADING) ---
 model = None
@@ -94,9 +98,10 @@ def final_classification(code):
 
 @app.route('/', methods=['GET'])
 def home():
-    return "RNN Backend is Running! Send POST requests to /analyze."
+    return "RNN Backend is Running! Send POST requests to /predict."
 
-@app.route('/analyze', methods=['POST'])
+# --- ROUTE FIX: Changed from /analyze to /predict to match frontend ---
+@app.route('/predict', methods=['POST'])
 def analyze_contract_rnn():
     """API endpoint to predict reentrancy using the RNN model."""
     try:
@@ -145,4 +150,6 @@ def analyze_contract_rnn():
 # Run the app
 if __name__ == "__main__":
     print("Starting Flask server for RNN model...")
-    app.run(host='0.0.0.0', port=5001, debug=True)
+    # Use environment variable for PORT if available (Best practice for Render)
+    port = int(os.environ.get("PORT", 5001))
+    app.run(host='0.0.0.0', port=port, debug=True)

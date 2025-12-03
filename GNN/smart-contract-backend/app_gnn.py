@@ -162,14 +162,18 @@ def contract_to_graph_for_prediction(source_code: str):
 
 # --- Initialize Flask App and Configure CORS ---
 app = Flask(__name__)
-CORS(app)
+
+# --- CORS FIX ---
+# Allow all origins ("*") and OPTIONS method to fix preflight/Render errors
+CORS(app, resources={r"/*": {"origins": "*"}}, methods=["GET", "POST", "OPTIONS"])
 
 # --- Define the Analysis Endpoint ---
 @app.route('/', methods=['GET'])
 def home():
-    return "GNN Backend is Running! Send POST requests to /analyze."
+    return "GNN Backend is Running! Send POST requests to /predict."
 
-@app.route('/analyze', methods=['POST'])
+# --- ROUTE FIX: Changed from /analyze to /predict to match frontend ---
+@app.route('/predict', methods=['POST'])
 def analyze_contract():
     try:
         # 1. Trigger Lazy Loading
@@ -229,5 +233,6 @@ def analyze_contract():
 # --- Run the App ---
 if __name__ == '__main__':
     print("Starting Flask server for GNN model...")
-    # Run on port 5002 to avoid conflict with the text-based model server
-    app.run(host='0.0.0.0', port=5002, debug=True)
+    # Use environment variable for PORT if available (Best practice for Render)
+    port = int(os.environ.get("PORT", 5002))
+    app.run(host='0.0.0.0', port=port, debug=True)
