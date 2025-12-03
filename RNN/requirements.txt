@@ -1,8 +1,10 @@
 flask
 flask-cors
 gunicorn
-torch
-torch_geometric
+tensorflow
 numpy
+pandas
+scikit-learn
+joblib
 slither-analyzer
 solc-select
