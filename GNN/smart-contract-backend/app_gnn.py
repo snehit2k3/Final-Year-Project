@@ -2,6 +2,7 @@ import re
 import os
 import shutil
 import tempfile
+import traceback  # Added for detailed error logging
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
@@ -22,7 +23,6 @@ def get_solc_version(source_code: str):
     version_str = pragma_match.group(1)
     
     # Find any version number (e.g., 0.8.20)
-    # This regex is improved to handle common version specifiers
     version_match = re.search(r"(\d+\.\d+\.\d+)", version_str)
     if version_match:
         return version_match.group(1)
@@ -36,8 +36,6 @@ torch = None
 Slither = None
 Data = None
 Batch = None
-
-# We need to define GAT inside the loader or make it accessible
 GAT = None
 
 def load_resources():
@@ -122,9 +120,9 @@ def contract_to_graph_for_prediction(source_code: str):
         tmp_path = tmp.name
     
     try:
-        solc_version = get_solc_version(source_code)
-        # Use the global Slither class we imported lazily
-        slither_instance = Slither(tmp_path, solc=SOLC_PATH, solc_solcs_select=solc_version)
+        # --- FIX: Removed solc_solcs_select to prevent Render crashes ---
+        # We now rely on the default installed 'solc'
+        slither_instance = Slither(tmp_path, solc=SOLC_PATH)
         
         node_map, node_expressions, all_edges = {}, [], []
 
@@ -144,27 +142,28 @@ def contract_to_graph_for_prediction(source_code: str):
         
         os.remove(tmp_path)
 
-        if not node_expressions: return None
+        if not node_expressions: 
+            return None, "No nodes found in contract (parsing empty?)."
         
         # Use global torch
         node_features = torch.tensor(vectorizer.transform(node_expressions).toarray(), dtype=torch.float)
         edge_index = torch.tensor(all_edges, dtype=torch.long).t().contiguous() if all_edges else torch.empty((2, 0), dtype=torch.long)
         
-        # Use global Data
-        return Data(x=node_features, edge_index=edge_index)
+        # Use global Data. Return Data AND None (no error)
+        return Data(x=node_features, edge_index=edge_index), None
 
     except Exception as e:
         print(f"--- SLITHER PARSING FAILED ---")
-        print(f"Error: {e}")
+        traceback.print_exc() # Print full stack trace to logs
         if os.path.exists(tmp_path):
             os.remove(tmp_path)
-        return None
+        # Return None AND the error message
+        return None, str(e)
 
 # --- Initialize Flask App and Configure CORS ---
 app = Flask(__name__)
 
 # --- CORS FIX ---
-# Allow all origins ("*") and OPTIONS method to fix preflight/Render errors
 CORS(app, resources={r"/*": {"origins": "*"}}, methods=["GET", "POST", "OPTIONS"])
 
 # --- Define the Analysis Endpoint ---
@@ -192,10 +191,13 @@ def analyze_contract():
         source_code = data['source_code']
         
         # 2. Parse Contract
-        graph_data = contract_to_graph_for_prediction(source_code)
+        # Unpack the tuple: graph_data, error_msg
+        graph_data, error_msg = contract_to_graph_for_prediction(source_code)
         
         if graph_data is None:
-            return jsonify({'error': 'Failed to parse the smart contract. It may contain syntax errors or an unsupported pragma version.'}), 400
+            # Return the ACTUAL error message for debugging
+            print(f"Parsing error: {error_msg}")
+            return jsonify({'error': f"Failed to parse smart contract. Reason: {error_msg}"}), 400
 
         # 3. Predict
         data_batch = Batch.from_data_list([graph_data])
