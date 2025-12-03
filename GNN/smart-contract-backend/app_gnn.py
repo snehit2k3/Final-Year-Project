@@ -115,6 +115,11 @@ def contract_to_graph_for_prediction(source_code: str):
     if not Slither or not vectorizer:
         raise RuntimeError("Resources not loaded. Call load_resources() first.")
 
+    # --- PRAGMA PATCH FIX ---
+    # The Render server has solc 0.8.20 installed.
+    # We automatically replace the version line to match the server.
+    source_code = re.sub(r'pragma solidity\s*[^;]+;', 'pragma solidity 0.8.20;', source_code)
+
     with tempfile.NamedTemporaryFile(mode='w', suffix='.sol', delete=False, encoding='utf-8') as tmp:
         tmp.write(source_code)
         tmp_path = tmp.name
