@@ -4,4 +4,4 @@ gunicorn
 numpy
 slither-analyzer
 solc-select
-# We will install torch separately in the build command to ensure CPU version
+joblib
