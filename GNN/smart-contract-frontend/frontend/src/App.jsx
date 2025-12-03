@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { FileText, Zap, Aperture, CheckCircle, Upload, XCircle, Code, Loader2, Database } from 'lucide-react';
-
+import.meta.env.VITE_RNN_API;
 // Utility component for consistent Card styling
 const Card = ({ title, content, color, icon: Icon, defaultText }) => (
   <div className={`p-4 ${color} border rounded-xl shadow-sm space-y-2`}>
