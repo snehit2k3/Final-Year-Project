@@ -1,8 +1,7 @@
 flask
 flask-cors
 gunicorn
-torch
-torch_geometric
 numpy
 slither-analyzer
 solc-select
+# We will install torch separately in the build command to ensure CPU version
