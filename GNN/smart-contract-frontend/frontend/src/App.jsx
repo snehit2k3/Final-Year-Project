@@ -90,10 +90,10 @@ export default function App() {
     let apiUrl;
     if (selectedModel === 'rnn') {
       // Uses the Vercel Env Variable if available, otherwise defaults to localhost for testing
-      const baseUrl = process.env.REACT_APP_RNN_API || 'http://127.0.0.1:5001';
+      const baseUrl = process.env.REACT_APP_RNN_API || 'https://rnn-backend-0vd1.onrender.com';
       apiUrl = `${baseUrl}/analyze`; 
     } else { // 'gnn'
-      const baseUrl = process.env.REACT_APP_GNN_API || 'http://127.0.0.1:5002';
+      const baseUrl = process.env.REACT_APP_GNN_API || 'https://gnn-backend-q9a6.onrender.com';
       apiUrl = `${baseUrl}/analyze`;
     }
     // -------------------------
